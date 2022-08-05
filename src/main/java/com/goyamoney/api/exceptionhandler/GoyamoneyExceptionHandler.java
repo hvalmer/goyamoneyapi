@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -57,6 +59,19 @@ public class GoyamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
 	}
+ 	
+ 	//tratando mensagem de erro da exceção para Lancamento
+ 	@ExceptionHandler({DataIntegrityViolationException.class})
+ 	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request){
+ 		
+ 		//personalizando a exceção com o ResponseEntity<>
+ 		String mensagemUsuario= messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());
+		//detalha melhor onde foi o erro
+ 		String mensagemDesenvolvedor= ExceptionUtils.getRootCauseMessage(ex);
+		List<MensagemErro> erros = Arrays.asList(new MensagemErro(mensagemUsuario, mensagemDesenvolvedor));
+		
+		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+ 	}
 	
 	//retornando uma lista de erros
 	private List<MensagemErro> criarListaDeErros(BindingResult bindingResult){
