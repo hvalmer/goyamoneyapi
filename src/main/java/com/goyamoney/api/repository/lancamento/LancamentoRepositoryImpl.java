@@ -22,84 +22,81 @@ import com.goyamoney.api.repository.filter.LancamentoFilter;
 
 public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 
-	//injetando a pessitencia para poder trabalhar com a consulta
+	// injetando a pessitencia para poder trabalhar com a consulta
 	@PersistenceContext
 	private EntityManager manager;
-	
-	//lista paginada com Pegeable(size, page), Page(paginaçao) de uma pesquisa
+
+	// lista paginada com Pegeable(size, page), Page(paginaçao) de uma pesquisa
 	@Override
 	public Page<Lancamento> filtrar(LancamentoFilter lancamentoFilter, Pageable pageable) {
-		
-		//fazendo a consulta com a criteria do JPA
+
+		// fazendo a consulta com a criteria do JPA
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
 		CriteriaQuery<Lancamento> criteria = builder.createQuery(Lancamento.class);
 		Root<Lancamento> root = criteria.from(Lancamento.class);
-		
-		//adicionando os filtros, as restrições
+
+		// adicionando os filtros, as restrições
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		criteria.where(predicates);
-		
+
 		TypedQuery<Lancamento> query = manager.createQuery(criteria);
-		
-		//adicionando a quantidade total de resultados para trazer
+
+		// adicionando a quantidade total de resultados para trazer
 		adicionarRestricoesDePaginacao(query, pageable);
-		
-		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter)) ;
+
+		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter));
 	}
-
-
-
 
 	private Predicate[] criarRestricoes(LancamentoFilter lancamentoFilter, CriteriaBuilder builder,
 			Root<Lancamento> root) {
-		//criando um array de Predicate que é variável
+		// criando um array de Predicate que é variável
 		List<Predicate> predicates = new ArrayList<>();
-		
-		//where descricao like '%aopnvoanc%'
-		//criando uma lista de predicates
-		if(!ObjectUtils.isEmpty(lancamentoFilter.getDescricao())) {
-			predicates.add(builder.like(
-					builder.lower(root.get(Lancamento_.descricao)), "%" + lancamentoFilter.getDescricao().toLowerCase() + "%"));
+
+		// where descricao like '%aopnvoanc%'
+		// criando uma lista de predicates
+		if (!ObjectUtils.isEmpty(lancamentoFilter.getDescricao())) {
+			predicates.add(builder.like(builder.lower(root.get(Lancamento_.descricao)),
+					"%" + lancamentoFilter.getDescricao().toLowerCase() + "%"));
 		}
-		if(lancamentoFilter.getDataVencimentoDe() != null) {
-			predicates.add(
-					builder.greaterThanOrEqualTo(root.get(Lancamento_.dataVencimento), lancamentoFilter.getDataVencimentoDe()));
+		if (lancamentoFilter.getDataVencimentoDe() != null) {
+			predicates.add(builder.greaterThanOrEqualTo(root.get(Lancamento_.dataVencimento),
+					lancamentoFilter.getDataVencimentoDe()));
 		}
-		if(lancamentoFilter.getDataVencimentoAte() != null) {
-			predicates.add(
-					builder.lessThanOrEqualTo(root.get(Lancamento_.dataVencimento), lancamentoFilter.getDataVencimentoAte()));
+		if (lancamentoFilter.getDataVencimentoAte() != null) {
+			predicates.add(builder.lessThanOrEqualTo(root.get(Lancamento_.dataVencimento),
+					lancamentoFilter.getDataVencimentoAte()));
 		}
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
 
-	//adicionar as retrições de paginação
+	// adicionar as retrições de paginação
 	private void adicionarRestricoesDePaginacao(TypedQuery<Lancamento> query, Pageable pageable) {
 		int paginaAtual = pageable.getPageNumber();
 		int totalRegistrosPorPagina = pageable.getPageSize();
 		int primeiroRegitroPorPagina = paginaAtual * totalRegistrosPorPagina;
-		
-		//informando para a query o registro por página e o total
+
+		// informando para a query o registro por página e o total
 		query.setFirstResult(primeiroRegitroPorPagina);
 		query.setMaxResults(totalRegistrosPorPagina);
 	}
-	
-	//calcular a quantidade total p esse filtro
+
+	// calcular a quantidade total p esse filtro
 	private Long total(LancamentoFilter lancamentoFilter) {
-		
-		//criando uma nova query para pesquisar esse filtro
+
+		// criando uma nova query para pesquisar esse filtro
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
 		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-		
-		//fazendo a consulta
+
+		// fazendo a consulta
 		Root<Lancamento> root = criteria.from(Lancamento.class);
-		
-		//adicionando o filtro
+
+		// adicionando o filtro
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		criteria.where(predicates);
-		
-		//contando os registros
+
+		// contando os registros
 		criteria.select(builder.count(root));
-		
+
 		return manager.createQuery(criteria).getSingleResult();
 	}
 }
