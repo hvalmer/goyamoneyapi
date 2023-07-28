@@ -2,13 +2,13 @@ package com.goyamoney.api.token;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -29,19 +29,21 @@ public class RefreshTokenCookiePreProcessorFilter implements Filter {
 		
 		//verificando se requisicao é pra /oauth/token
 		//o javascript não tem acesso ao refresh token
-		if("/oauth/token".equalsIgnoreCase(req.getRequestURI())
-				&& "refresh_token".equals(req.getParameter("grant_type"))
-				&& req.getCookies() != null) {
-			for(Cookie cookie : req.getCookies()) {
-				if(cookie.getName().equals("refreshToken")) {
-					//entrando dentro do cookie e pegando o valor no refreshtoken
-					String refreshToken = cookie.getValue();
-					req = new MyServletRequestWrapper(req, refreshToken);
-				}
+		if ("/oauth/token".equalsIgnoreCase(req.getRequestURI())
+			    && "refresh_token".equals(req.getParameter("grant_type"))
+			    && req.getCookies() != null) {
+
+			  String refreshToken = 
+			      Stream.of(req.getCookies())
+			          .filter(cookie -> "refreshToken".equals(cookie.getName()))
+			          .findFirst()
+			          .map(cookie -> cookie.getValue())
+			          .orElse(null);
+
+			  req = new MyServletRequestWrapper(req, refreshToken);
 			}
-		}
-		
-		chain.doFilter(req, response);
+
+			chain.doFilter(req, response);
 	}
 
 	static class MyServletRequestWrapper extends HttpServletRequestWrapper{

@@ -35,10 +35,10 @@ public class CorsFilter implements Filter {
 		//O CORS nada mais é que adicionar esses HTTP´s, que começam com Access-Control
 		/*se a originPermitida = Origin, que veio do Browser e for uma req OPTIONS,
 		 * permite setando os headers. Caso não, o CORS não estará habilitado*/ 
-		if("OPTIONS".equals(request.getMethod()) && originPermitida.equals("Origin")) {
+		if("OPTIONS".equals(request.getMethod()) && originPermitida.equals(request.getHeader("Origin"))) {
 			//no response, setando varios headers
 			response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");//metodos HTTP permitidos
-			response.setHeader("Access-Control-Allow-Methods", "Authorization, Content-Type, Accept");//headers permitidos
+			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");//headers permitidos
 			response.setHeader("Access-Control-Max-Age", "3600");//tempo de 1h p a proxima req
 			
 			response.setStatus(HttpServletResponse.SC_OK);

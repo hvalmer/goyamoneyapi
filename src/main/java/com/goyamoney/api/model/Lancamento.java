@@ -142,5 +142,4 @@ public class Lancamento {
 		return Objects.equals(codigo, other.codigo);
 	}
 	
-	
 }

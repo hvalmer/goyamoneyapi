@@ -50,7 +50,7 @@ public class CategoriaResource {
 
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, categoriaSalva.getCodigo()));
 
-		// retorna no bory o código da categoria salva
+		// retorna no body o código da categoria salva
 		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
 	}
 
@@ -61,6 +61,7 @@ public class CategoriaResource {
 	public ResponseEntity<Categoria> buscarPeloCodigo(@PathVariable Long codigo) {
 		// método findById retorna um Optional, tratando objetos null
 		Optional<Categoria> categoria = this.categoriaRepository.findById(codigo);
-		return categoria.isPresent() ? ResponseEntity.ok(categoria.get()) : ResponseEntity.notFound().build();
+		return categoria.isPresent() ? 
+				ResponseEntity.ok(categoria.get()) : ResponseEntity.notFound().build();
 	}
 }

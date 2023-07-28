@@ -41,7 +41,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 
 		TypedQuery<Lancamento> query = manager.createQuery(criteria);
 
-		// adicionando a quantidade total de resultados para trazer
+		// adicionando a quantidade total de resultados para trazer por página
 		adicionarRestricoesDePaginacao(query, pageable);
 
 		return new PageImpl<>(query.getResultList(), pageable, total(lancamentoFilter));
@@ -73,14 +73,14 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 	private void adicionarRestricoesDePaginacao(TypedQuery<Lancamento> query, Pageable pageable) {
 		int paginaAtual = pageable.getPageNumber();
 		int totalRegistrosPorPagina = pageable.getPageSize();
-		int primeiroRegitroPorPagina = paginaAtual * totalRegistrosPorPagina;
+		int primeiroRegitroDaPagina = paginaAtual * totalRegistrosPorPagina;
 
 		// informando para a query o registro por página e o total
-		query.setFirstResult(primeiroRegitroPorPagina);
+		query.setFirstResult(primeiroRegitroDaPagina);
 		query.setMaxResults(totalRegistrosPorPagina);
 	}
 
-	// calcular a quantidade total p esse filtro
+	// calcular a quantidade de elementos totais p esse filtro
 	private Long total(LancamentoFilter lancamentoFilter) {
 
 		// criando uma nova query para pesquisar esse filtro
@@ -94,7 +94,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		Predicate[] predicates = criarRestricoes(lancamentoFilter, builder, root);
 		criteria.where(predicates);
 
-		// contando os registros
+		// contando os registros existe no final
 		criteria.select(builder.count(root));
 
 		return manager.createQuery(criteria).getSingleResult();

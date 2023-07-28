@@ -78,9 +78,9 @@ public class GoyamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		List<MensagemErro> erros = new ArrayList<>();
 		
 		for(FieldError fieldError : bindingResult.getFieldErrors()) {
-		String mensagemUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
-		String mensagemDesenvolvedor = fieldError.toString();
-		erros.add(new MensagemErro(mensagemUsuario, mensagemDesenvolvedor));
+			String mensagemUsuario = messageSource.getMessage(fieldError, LocaleContextHolder.getLocale());
+			String mensagemDesenvolvedor = fieldError.toString();
+			erros.add(new MensagemErro(mensagemUsuario, mensagemDesenvolvedor));
 		}
 		
 		return erros;
