@@ -10,15 +10,19 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import com.goyamoney.api.config.property.GoyamoneyApiProperty;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)//ordem de prioridade alta, executando logo no início
 public class CorsFilter implements Filter {
 
-	private String originPermitida = "http://localhost:8000";//TODO: Configurar para diferentes ambientes, ou seja, Teste e Producao
+	@Autowired
+	private GoyamoneyApiProperty goyamoneyApiProperty;
 	
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
@@ -29,13 +33,13 @@ public class CorsFilter implements Filter {
 		
 		//enviados sempre em todas as requisicoes, para continuar funcionando...
 		//os dois headers precisam estar na resposta
-		response.setHeader("Access-Control-Allow-Origin", originPermitida);
+		response.setHeader("Access-Control-Allow-Origin", goyamoneyApiProperty.getOriginPermitida());
 		response.setHeader("Access-Control-Allow-Credentials", "true");
 		
 		//O CORS nada mais é que adicionar esses HTTP´s, que começam com Access-Control
 		/*se a originPermitida = Origin, que veio do Browser e for uma req OPTIONS,
 		 * permite setando os headers. Caso não, o CORS não estará habilitado*/ 
-		if("OPTIONS".equals(request.getMethod()) && originPermitida.equals(request.getHeader("Origin"))) {
+		if("OPTIONS".equals(request.getMethod()) && goyamoneyApiProperty.getOriginPermitida().equals(request.getHeader("Origin"))) {
 			//no response, setando varios headers
 			response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT, OPTIONS");//metodos HTTP permitidos
 			response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept");//headers permitidos

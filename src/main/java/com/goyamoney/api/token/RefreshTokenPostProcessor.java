@@ -4,6 +4,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -16,10 +17,15 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import com.goyamoney.api.config.property.GoyamoneyApiProperty;
+
 //<OAuth2AccessToken>(parametro generico) - é o tipo do dado que será interceptado qdo estiver voltando 
 @SuppressWarnings("deprecation")
 @ControllerAdvice
 public class RefreshTokenPostProcessor implements ResponseBodyAdvice<OAuth2AccessToken> {
+	
+	@Autowired
+	private GoyamoneyApiProperty goyamoneyApiProperty;
 
 	@Override
 	public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -58,7 +64,7 @@ public class RefreshTokenPostProcessor implements ResponseBodyAdvice<OAuth2Acces
 		Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
 		//só acessivel em http
 		refreshTokenCookie.setHttpOnly(true);
-		refreshTokenCookie.setSecure(false); //TODO:Mudar para true em producao
+		refreshTokenCookie.setSecure(goyamoneyApiProperty.getSeguranca().isEnableHttps());
 		//qual caminho que esse Cokie sera enviado pelo browser automaticamente
 		refreshTokenCookie.setPath(req.getContextPath() + "/oauth/token");
 		//quanto tempo o Cookie vai expirar em dias,30 dias

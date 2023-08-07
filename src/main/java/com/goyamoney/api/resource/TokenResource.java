@@ -4,10 +4,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.goyamoney.api.config.property.GoyamoneyApiProperty;
 
 /*
  * LOGOUT---o access_token(manipulado no JS) tem um tempo de vida menor
@@ -20,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/tokens")
 public class TokenResource {
+	
+	@Autowired
+	private GoyamoneyApiProperty goyamoneyApiProperty;
 
 	//revoke - revogar, invalidar um token
 	@DeleteMapping("/revoke")
@@ -27,7 +33,7 @@ public class TokenResource {
 		//removendo o Cookie
 		Cookie cookie = new Cookie("refreshToken", null);
 		cookie.setHttpOnly(true);
-		cookie.setSecure(false);//TODO: em producao true
+		cookie.setSecure(goyamoneyApiProperty.getSeguranca().isEnableHttps());
 		cookie.setPath(req.getContextPath() + "/oauth/token");
 		cookie.setMaxAge(0);
 		
